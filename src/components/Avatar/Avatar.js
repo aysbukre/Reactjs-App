@@ -6,6 +6,8 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Box, FormControlLabel, Grid, List, ListItem, ListItemSecondaryAction, Modal, Radio, RadioGroup, avatarClasses } from '@mui/material';
+import { PutWithAuth } from "../../services/HttpService";
+
 
 function Avatar(props) {
 
@@ -13,11 +15,25 @@ function Avatar(props) {
     const [open, setOpen] = React.useState(false);
     const [selectedValue, setSelectedValue] = useState(avatarId);
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+
+
+    const saveAvatar = () => {
+        PutWithAuth("/users/"+localStorage.getItem("currentUser"), {
+          avatar: selectedValue,
+        })
+          .then((res) => res.json())
+          .catch((err) => console.log(err))
+        }
 
     const handleChange = (event) => {
         setSelectedValue(event.target.value);
     };
+
+    const handleClose = () => {
+        setOpen(false);
+        saveAvatar();
+      };
+
 
     const style = {
         position: 'absolute',

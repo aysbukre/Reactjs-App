@@ -12,6 +12,9 @@ import CommentIcon from '@mui/icons-material/Comment';
 import { Link } from "react-router-dom";
 import { Button, Input, InputAdornment, OutlinedInput, Snackbar } from "@mui/material";
 import Alert from '@mui/material/Alert';
+import { PostWithAuth } from "../../services/HttpService";
+
+
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
     return <IconButton {...other} />;
@@ -30,24 +33,14 @@ function PostForm(props) {
     const [isSent, setIsSent] = useState(false);
     
     const savePost = () => {
-        fetch("/posts",
-
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization" : localStorage.getItem("tokenKey")
-                },
-                body: JSON.stringify({
-                    title: title,
-                    userId: userId,
-                    text: text,
-                }),
-            })
-            .then((res) => res.json())
-            .catch((err) => console.log(err))
-    }
-
+        PostWithAuth("/posts", {
+          title: title, 
+          userId : userId,
+          text : text,
+        })
+          .then((res) => res.json())
+          .catch((err) => console.log(err))
+        }
     const handleSumbit = () => {
         savePost();
         setIsSent(true);
@@ -79,8 +72,6 @@ function PostForm(props) {
             <Snackbar open ={isSent} autoHideDuration={2000} onClose={handleClose}>
             <Alert severity="success">Your Post is Sended.</Alert>
             </Snackbar>
-            
-
             <Card sx={{ width: 800, margin: 5 }}>
                 <CardHeader
                     avatar={
@@ -98,9 +89,7 @@ function PostForm(props) {
                         fullWidth
                         value={title}
                         onChange={(i) => handleTitle(i.target.value)}
-
                     >
-
                     </OutlinedInput>}
                 />
                 <CardContent>
@@ -122,7 +111,6 @@ function PostForm(props) {
                                     >Post</Button>
                                 </InputAdornment>}
                         >
-
                         </OutlinedInput>
                     </Typography>
                 </CardContent>

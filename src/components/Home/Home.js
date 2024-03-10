@@ -2,6 +2,8 @@ import { Container } from "@mui/material";
 import Post from "../Post/Post";
 import React, { useState, useEffect } from "react";
 import PostForm from "../Post/PostForm";
+
+
 function Home() {
 
     const [error, setError] = useState(null);
@@ -10,22 +12,23 @@ function Home() {
 
     const refreshPosts = () => {
         fetch("/posts")
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    setIsLoaded(true);
-                    setPostList(result);
-                },
-                (error) => {
-                    setIsLoaded(true);
-                    setError(error);
-                }
-            )
+        .then(res => res.json())
+        .then(
+            (result) => {
+                setIsLoaded(true);
+                setPostList(result)
+            },
+            (error) => {
+                console.log(error)
+                setIsLoaded(true);
+                setError(error);
+            }
+        )
     }
 
     useEffect(() => {
         refreshPosts();
-    }, [postList]);
+    }, []);
 
     if (error) {
         return <div>error!!</div>;

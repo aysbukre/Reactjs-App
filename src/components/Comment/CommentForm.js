@@ -4,33 +4,51 @@ import Avatar from '@mui/material/Avatar';
 import { red } from '@mui/material/colors';
 import { Button, InputAdornment, OutlinedInput } from "@mui/material";
 import { Link } from "react-router-dom";
+import { PostWithAuth, RefreshToken } from "../../services/HttpService";
+import { Logout } from "@mui/icons-material";
 
 
 function CommentForm(props) {
-    const { postId,  userId, userName } = props;
+    const { postId,  userId, userName ,setCommentRefresh} = props;
     const [text,setText]=useState("");
 
     const saveComment = () => {
-        fetch("/comments",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization" : localStorage.getItem("tokenKey")
-                },
-                body: JSON.stringify({
-                    postId:postId,
-                    userId: userId,
-                    text: text,
-                }),
-            })
-            .then((res) => res.json())
-            .catch((err) => console.log(err))
+        PostWithAuth("/comments",{
+            postId: postId, 
+            userId : userId,
+            text : text,
+          })
+          .then((res) => {
+            if(!res.ok) {
+                RefreshToken()
+                .then((res) => { if(!res.ok) {
+                    Logout();
+                } else {
+                   return res.json()
+                }})
+                .then((result) => {
+                    console.log(result)
+
+                    if(result != undefined){
+                        localStorage.setItem("tokenKey",result.accessToken);
+                        saveComment();
+                        setCommentRefresh();
+                    }})
+                .catch((err) => {
+                    console.log(err)
+                })
+            } else 
+            res.json()
+        })
+          .catch((err) => {
+            console.log(err)
+          })
     }
 
     const handleSumbit = () =>{
         saveComment();
         setText("");
+        setCommentRefresh();
 
     }
     const handleChange = (value)=>{
