@@ -63,17 +63,6 @@ function Post(props) {
     }
 
   }
-
-  const saveLike = () => {
-    PostWithAuth("/likes",{
-          
-      postId: postId,
-      userId: localStorage.getItem("currentUser"),
-    })
-      .then((res) => res.json())
-      .catch((err) => console.log(err))
-  }
-
   const refreshComments = () => {
     fetch("/comments?postId="+postId)
     .then(res => res.json())
@@ -91,6 +80,18 @@ function Post(props) {
 
     setRefresh(false)
   }
+
+  const saveLike = () => {
+    PostWithAuth("/likes",{
+          
+      postId: postId,
+      userId: localStorage.getItem("currentUser"),
+    })
+      .then((res) => res.json())
+      .catch((err) => console.log(err))
+  }
+
+  
 
   const deleteLike = () => {
     DeleteWithAuth("/likes/"+likeId)
@@ -168,10 +169,10 @@ function Post(props) {
           <Container fixed>
             {error ? "error" :
               isLoaded ? commentList.map(comment => (
-                <Comment userId={userId} userName={userName} text={comment.text}></Comment>
+                <Comment userId={comment.userId} userName={comment.userName} text={comment.text}></Comment>
               )) : "Loading"}
             {disabled ? "" :
-              <CommentForm userId={userId} userName={userName} postId={postId} setCommentRefresh={setCommentRefresh}></CommentForm>}
+              <CommentForm userId = {localStorage.getItem("currentUser")} userName = {localStorage.getItem("userName")} postId={postId} setCommentRefresh={setCommentRefresh}></CommentForm>}
           </Container>
         </CardContent>
       </Collapse>

@@ -5,12 +5,19 @@ import { red } from '@mui/material/colors';
 import { Button, InputAdornment, OutlinedInput } from "@mui/material";
 import { Link } from "react-router-dom";
 import { PostWithAuth, RefreshToken } from "../../services/HttpService";
-import { Logout } from "@mui/icons-material";
 
 
 function CommentForm(props) {
     const { postId,  userId, userName ,setCommentRefresh} = props;
     const [text,setText]=useState("");
+
+    const logout = () => {
+        localStorage.removeItem("tokenKey")
+        localStorage.removeItem("currentUser")
+        localStorage.removeItem("refreshKey")
+        localStorage.removeItem("userName")
+        //History.go(0)
+      }
 
     const saveComment = () => {
         PostWithAuth("/comments",{
@@ -22,7 +29,7 @@ function CommentForm(props) {
             if(!res.ok) {
                 RefreshToken()
                 .then((res) => { if(!res.ok) {
-                    Logout();
+                    logout();
                 } else {
                    return res.json()
                 }})

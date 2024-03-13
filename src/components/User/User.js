@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UserActivity from "../UserActivity/UserActivity";
-import { Grid, Stack } from "@mui/material";
+import { Grid } from "@mui/material";
 import Avatar from "../Avatar/Avatar";
 import { GetWithAuth } from "../../services/HttpService";
-
 
 function User() {
 
@@ -12,18 +11,18 @@ function User() {
     const [user, setUser] = useState();
 
     const getUser = () => {
-        GetWithAuth("/users/"+userId)
-        .then(res => res.json())
-        .then(
-            (result) => {
-                console.log(result);
-                setUser(result);
-            },
-            (error) => {
-                console.log(error)
-            }
-        )
-        }
+        GetWithAuth("/users/" + userId)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    console.log(result);
+                    setUser(result);
+                },
+                (error) => {
+                    console.log(error)
+                }
+            )
+    }
 
     useEffect(() => {
         getUser()
@@ -32,13 +31,13 @@ function User() {
     return (
         <Grid container spacing={2}>
             <Grid item xs={4}>
-            {user ?
-                <Avatar avatarId={user.avatar} userId={userId} userName={"Username"} />
-                :""}
+                {user ?
+                    <Avatar avatarId={user.avatarId} userId={userId} userName={user.userName} />
+                    : ""}
             </Grid>
             <Grid item xs={8}>
-
-                <UserActivity userId={userId}/>
+            {localStorage.getItem("currentUser")==userId ?<UserActivity userId={userId} /> : "" }
+                
             </Grid>
         </Grid>
     )

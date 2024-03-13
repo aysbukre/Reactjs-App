@@ -5,11 +5,11 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { AppBar, Button, Dialog, IconButton, Slide, Toolbar, Typography } from '@mui/material';
 import Post from '../Post/Post';
 import { Close } from '@mui/icons-material';
+import { GetWithAuth } from '../../services/HttpService';
 
 
 
@@ -98,8 +98,13 @@ function UserActivity(props) {
 
     const [rows, setRows] = useState([]);
 
+    const handleNotification = (postId) => {
+        setSelectedPost(postId);
+        setIsOpen(true);
+    };
+
     const getActivity = () => {
-        GetWithAuth("/users/activity/"+userId)
+        GetWithAuth("/users/activity/" +userId)
         .then(res => res.json())
         .then(
             (result) => {
@@ -119,10 +124,7 @@ function UserActivity(props) {
         getActivity()
     }, [])
 
-    const handleNotification = (postId) => {
-        setSelectedPost(postId);
-        setIsOpen(true);
-    };
+    
 
     return (
         <div>

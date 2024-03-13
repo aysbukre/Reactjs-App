@@ -6,14 +6,10 @@ import Avatar from '@mui/material/Avatar';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
 import styled from "@emotion/styled";
-import CommentIcon from '@mui/icons-material/Comment';
+import { Alert, Button, InputAdornment, OutlinedInput, Snackbar } from "@mui/material";
 import { Link } from "react-router-dom";
-import { Button, Input, InputAdornment, OutlinedInput, Snackbar } from "@mui/material";
-import Alert from '@mui/material/Alert';
 import { PostWithAuth } from "../../services/HttpService";
-
 
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
@@ -26,98 +22,112 @@ const ExpandMore = styled((props) => {
     // }),
 }));
 
+
 function PostForm(props) {
     const { userId, userName, refreshPosts } = props;
-    const [text, setText] = useState("");
     const [title, setTitle] = useState("");
+    const [text, setText] = useState("");
     const [isSent, setIsSent] = useState(false);
-    
+
     const savePost = () => {
-        PostWithAuth("/posts", {
-          title: title, 
-          userId : userId,
-          text : text,
+        PostWithAuth("/posts",{
+            title: title,
+            userId: userId,
+            text: text,
         })
-          .then((res) => res.json())
-          .catch((err) => console.log(err))
-        }
-    const handleSumbit = () => {
+            .then((res) => res.json())
+            .catch((err) => console.log(err))
+    }
+
+    const handleSubmit = () => {
         savePost();
-        setIsSent(true);
         setTitle("");
         setText("");
+        setIsSent(true);
         refreshPosts();
-    }
+    };
 
     const handleTitle = (value) => {
-        setTitle(value)
+        setTitle(value);
         setIsSent(false);
-
-    }
+    };
 
     const handleText = (value) => {
-        setText(value)
+        setText(value);
         setIsSent(false);
+    };
 
-    }
-
-    const handleClose =(event,reason) => {
-        if(reason==='clickaway'){
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
             return;
         }
         setIsSent(false);
     }
+
     return (
         <div>
-            <Snackbar open ={isSent} autoHideDuration={2000} onClose={handleClose}>
-            <Alert severity="success">Your Post is Sended.</Alert>
+            <Snackbar open={isSent} autoHideDuration={2000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success">Your Post is Sent.</Alert>
             </Snackbar>
-            <Card sx={{ width: 800, margin: 5 }}>
+            <Card
+                sx={{
+                    width: 800, margin: 5
+                }}
+            >
                 <CardHeader
                     avatar={
-                        <Link color="inherit" component={Link} to={{ pathname: '/users/' + userId }} style={{ textDecoration: "none" }}>
+                        <Link to={{ pathname: '/users/' + userId }} style={{ textDecoration: "none" }}>
                             <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
                                 {userName[0].toUpperCase()}
                             </Avatar>
                         </Link>
                     }
-                    title={<OutlinedInput
-                        id="outlined-adorment-amount"
-                        multiline
-                        placeholder="title"
-                        InputProps={{ maxLength: 25 }}
-                        fullWidth
-                        value={title}
-                        onChange={(i) => handleTitle(i.target.value)}
-                    >
-                    </OutlinedInput>}
+                    title={
+                        <OutlinedInput
+                            id="outlined-adortment-amount"
+                            multiline
+                            placeholder="Title"
+                            InputProps={{ maxLength: 25 }}
+                            fullWidth
+                            value={title}
+                            onChange={(input) => {
+                                handleTitle(input.target.value)
+                            }}
+                        >
+
+                        </OutlinedInput>
+                    }
                 />
+
                 <CardContent>
                     <Typography variant="body2" color="text.secondary">
                         <OutlinedInput
-                            id="outlined-adorment-amount"
+                            id="outlined-adortment-amount"
                             multiline
-                            placeholder="text"
+                            placeholder="Text"
                             InputProps={{ maxLength: 250 }}
                             fullWidth
                             value={text}
-                            onChange={(i) => handleText(i.target.value)}
-
+                            onChange={(input) => {
+                                handleText(input.target.value)
+                            }}
                             endAdornment={
                                 <InputAdornment position="end">
                                     <Button
                                         variant="contained"
-                                        onClick={handleSumbit}
-                                    >Post</Button>
-                                </InputAdornment>}
+                                        onClick={handleSubmit}
+                                    >
+                                        Post
+                                    </Button>
+                                </InputAdornment>
+                            }
                         >
+
                         </OutlinedInput>
                     </Typography>
                 </CardContent>
-
             </Card>
         </div>
-
     )
 }
 
