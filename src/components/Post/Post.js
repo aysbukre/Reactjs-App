@@ -15,8 +15,7 @@ import { Container } from "@mui/material";
 import { Link } from "react-router-dom";
 import Comment from "../Comment/Comment";
 import CommentForm from "../Comment/CommentForm";
-import { DeleteWithAuth, PostWithAuth } from "../../services/HttpService";
-
+import { DeleteWithAuth, GetWithAuth, PostWithAuth, PostWithoutAuth } from "../../services/HttpService";
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -30,19 +29,22 @@ const ExpandMore = styled((props) => {
 }));
 
 function Post(props) {
-  const { postId, title, text, userId, userName, likes } = props;
+  const { postId, title, text, userId, userName } = props;
   const [expanded, setExpanded] = React.useState(false);
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [commentList, setCommentList] = useState([]);
-  const isInitialMount = useRef(true);
-  const [likeCount, setLikeCount] = useState(likes.length);
   const [isLiked, setIsLiked] = useState(false);
+  const isInitialMount = useRef(true);
+  const [likeCount, setLikeCount] = useState(0);
   const [likeId, setLikeId] = useState(null);
-  const [refresh,setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+  const [likeRefresh, setLikeRefresh] = useState(false);
+  const [likes, setLikes] = useState([]);
+
   let disabled = localStorage.getItem("currentUser") == null ? true : false;
 
-  const setCommentRefresh = ()=> {
+  const setCommentRefresh = () => {
     setRefresh(true);
   }
 
@@ -56,56 +58,85 @@ function Post(props) {
     if (!isLiked) {
       saveLike();
       setLikeCount(likeCount + 1)
-    }
-    else {
+    } else {
       deleteLike();
       setLikeCount(likeCount - 1)
     }
-
   }
+
   const refreshComments = () => {
-    fetch("/comments?postId="+postId)
-    .then(res => res.json())
-    .then(
+    fetch("/comments?postId=" + postId)
+      .then(res => res.json())
+      .then(
         (result) => {
-            setIsLoaded(true);
-            setCommentList(result)
+          setIsLoaded(true);
+          setCommentList(result);
         },
         (error) => {
-            console.log(error)
-            setIsLoaded(true);
-            setError(error);
+          console.log(error);
+          setIsLoaded(true);
+          setError(error);
         }
-    )
-
-    setRefresh(false)
+      )
+    setRefresh(false);
   }
 
   const saveLike = () => {
-    PostWithAuth("/likes",{
-          
+    PostWithAuth("/likes", {
       postId: postId,
       userId: localStorage.getItem("currentUser"),
     })
       .then((res) => res.json())
-      .catch((err) => console.log(err))
+      .catch((err) => console.log(err));
   }
 
-  
-
   const deleteLike = () => {
-    DeleteWithAuth("/likes/"+likeId)
+    DeleteWithAuth("/likes/" + likeId)
       .catch((err) => console.log(err))
+
+  }
+
+  useEffect(() => {
+    getLikes();
+  }, [likeRefresh]);
+
+  const setPostRefresh = () => {
+    setRefresh(true);
+  }
+
+  const getLikes = () => {
+    fetch("/likes?postId=" + postId)
+      .then((res) => {
+        console.log(res);
+
+        return res.json();
+      }).then(
+        (result) => {
+          console.log("aa");
+          console.log(result);
+          setLikeCount(result.length)
+          setLikes(result);
+          console.log(likes);
+          setPostRefresh();
+        }
+      )
+      .catch((err) => console.log(err));
+    setLikeRefresh(false);
   }
 
   const checkLikes = () => {
-    var likeControl = likes.find((like => ""+ like.userId === localStorage.getItem("currentUser")));
+    var likeControl = likes.find((like => like.userId == localStorage.getItem("currentUser")));
+    console.log(localStorage.getItem("currentUser"));
+    console.log(likeControl);
     if (likeControl != null) {
       setLikeId(likeControl.id);
-      console.log(likeId);
       setIsLiked(true);
     }
   }
+
+  useEffect(() => {
+    checkLikes();
+  }, [likes]);
 
   useEffect(() => {
     if (isInitialMount.current)
@@ -114,7 +145,6 @@ function Post(props) {
       refreshComments();
   }, [refresh]);
 
-  useEffect(() => { checkLikes() }, [])
 
   return (
     <Card
@@ -139,31 +169,24 @@ function Post(props) {
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-  {disabled ?  
-    <IconButton
-      disabled
-      onClick={handleLike}
-      aria-label="add to favorites">
-      <FavoriteIcon style={isLiked ? { color: "red" } : null} />
-    </IconButton>
-    :
-    <IconButton
-      onClick={handleLike}
-      aria-label="add to favorites">
-      <FavoriteIcon style={isLiked ? { color: "red" } : null} />
-    </IconButton>
-  }
-  {likeCount}
-  <ExpandMore
-    expand={expanded}
-    onClick={handleExpandClick}
-    aria-expanded={expanded}
-    aria-label="show more"
-  >
-    <CommentIcon />
-  </ExpandMore>
-</CardActions>
+        <IconButton
+          disabled={disabled}
+          onClick={handleLike}
+          aria-label="add to favorites">
+          <FavoriteIcon style={isLiked ? { color: "red" } : null} />
+        </IconButton>
 
+        {likeCount}
+
+        <ExpandMore
+          expand={expanded}
+          onClick={handleExpandClick}
+          aria-expanded={expanded}
+          aria-label="show more"
+        >
+          <CommentIcon />
+        </ExpandMore>
+      </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           <Container fixed>
@@ -171,8 +194,16 @@ function Post(props) {
               isLoaded ? commentList.map(comment => (
                 <Comment userId={comment.userId} userName={comment.userName} text={comment.text}></Comment>
               )) : "Loading"}
-            {disabled ? "" :
-              <CommentForm userId = {localStorage.getItem("currentUser")} userName = {localStorage.getItem("userName")} postId={postId} setCommentRefresh={setCommentRefresh}></CommentForm>}
+
+            {
+              disabled
+                ? ""
+                : <CommentForm postId={postId} userId={localStorage.getItem("currentUser")} userName={localStorage.getItem("userName")} setCommentRefresh={setCommentRefresh}
+                />
+            }
+
+            {/* {disabled ? "" :
+              <CommentForm userId={1} userName={"USER"} postId={postId} setCommentRefresh={setCommentRefresh}></CommentForm>} */}
           </Container>
         </CardContent>
       </Collapse>

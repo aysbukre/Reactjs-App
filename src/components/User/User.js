@@ -32,7 +32,7 @@ function User() {
         <Grid container spacing={2}>
             <Grid item xs={4}>
                 {user ?
-                    <Avatar avatarId={user.avatarId} userId={userId} userName={user.userName} />
+                    <Avatar avatarId={user.avatar} userId={userId} userName={user.userName} />
                     : ""}
             </Grid>
             <Grid item xs={8}>

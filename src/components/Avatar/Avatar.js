@@ -5,7 +5,7 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { Box, FormControlLabel, Grid, List, ListItem, ListItemSecondaryAction, Modal, Radio, RadioGroup, avatarClasses } from '@mui/material';
+import { Box, FormControlLabel, Grid, Modal, Radio, RadioGroup} from '@mui/material';
 import { PutWithAuth } from "../../services/HttpService";
 
 
@@ -15,7 +15,6 @@ function Avatar(props) {
     const [open, setOpen] = React.useState(false);
     const [selectedValue, setSelectedValue] = useState(avatarId);
     const handleOpen = () => setOpen(true);
-
 
     const saveAvatar = () => {
         PutWithAuth("/users/"+localStorage.getItem("currentUser"), {
