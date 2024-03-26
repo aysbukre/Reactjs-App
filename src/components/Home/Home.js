@@ -14,7 +14,7 @@ function Home() {
       }
 
     const refreshPosts = () => {
-        fetch("/posts")
+        fetch("/api/posts")
             .then(res => res.json())
             .then(
                 (result) => {
